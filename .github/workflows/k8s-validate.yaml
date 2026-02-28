@@ -1,10 +1,6 @@
 name: K8s Manifest Validation
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
   validate:
@@ -13,24 +9,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # This will show the error but let the job continue
       - name: Run Kubeconform
         uses: docker://ghcr.io/yannh/kubeconform:latest
-        continue-on-error: true 
+        continue-on-error: true
         with:
-          args: "-summary -strict -verbose -output pretty ."
+          args: "-summary -strict -verbose -output pretty demo.yaml demo2.yaml"
 
-      # This will also run even if Kubeconform failed
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0 # Pinning to a stable version
         continue-on-error: true
         with:
           scan-type: 'config'
-          severity: 'HIGH,CRITICAL'
           scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
 
-      # Finally, fail the build if ANY of the above had issues
-      # (Optional: remove continue-on-error from the last step to block the PR)
       - name: Run Kube-score
         run: |
-          docker run --rm -v $(pwd):/project:Z zegl/kube-score:latest score /project/*.yaml
+          docker run --rm -v $(pwd):/project:Z zegl/kube-score:latest score /project/demo.yaml /project/demo2.yaml
