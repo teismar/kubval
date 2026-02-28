@@ -2,6 +2,13 @@
 
 A "Keep It Simple, Stupid" (KISS) approach to validating Kubernetes manifests. This repository implements a layered defense strategy to catch errors before they reach your cluster.
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![Security-Trivy](https://img.shields.io/badge/security-trivy-blueviolet?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/teismar/kubval/k8s-validate.yaml?style=flat-square&label=pipeline)
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat-square&logo=kubernetes&logoColor=white)
+![Platform](https://img.shields.io/badge/platform-Fedora-blue?style=flat-square&logo=fedora)
+
 ## The Validation Funnel
 
 We chain four industry-standard tools to ensure your YAML is perfect:
