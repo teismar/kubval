@@ -9,25 +9,32 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # LAYER 1: Schema Check
+      # STEP 1: YAML Lint (Structural Integrity)
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        continue-on-error: true
+        with:
+          file_or_dir: "."
+          config_data: "{extends: default, rules: {line-length: disable}}"
+
+      # STEP 2: Kubeconform (Kubernetes Schema)
       - name: Run Kubeconform
         uses: docker://ghcr.io/yannh/kubeconform:latest
         continue-on-error: true
         with:
           args: "-summary -strict -verbose -output pretty demo.yaml demo2.yaml"
 
-      # LAYER 2: Security/IaC Check (Fixed Trivy)
-      - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@0.33.1  # Using the version from your docs
+      # STEP 3: Trivy (Security Best Practices)
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@0.33.1
         continue-on-error: true
         with:
-          scan-type: 'config'                  # Required for K8s manifest scanning
-          scan-ref: '.'                        # Points to the current directory
-          hide-progress: true
-          exit-code: '1'                       # Fail if issues are found
-          severity: 'CRITICAL,HIGH'            # Filter for serious issues
+          scan-type: 'config'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
 
-      # LAYER 3: Quality Check
+      # STEP 4: Kube-score (Operational Quality)
       - name: Run Kube-score
         run: |
           docker run --rm -v $(pwd):/project:Z zegl/kube-score:latest score /project/demo.yaml /project/demo2.yaml
